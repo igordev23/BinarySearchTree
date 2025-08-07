@@ -130,6 +130,100 @@ class BinarySearchTree<T> {
   size(): number {
     return this.count;
   }
+
+  // Exibir os nós ancestrais de um determinado elemento
+  ancestors(value: T): T[] {
+  const path: T[] = [];
+  let current = this.root;
+
+  while (current !== null) {
+    if (value === current.value) {
+      return path;
+    } else if (value < current.value) {
+      path.push(current.value);
+      current = current.left;
+    } else {
+      path.push(current.value);
+      current = current.right;
+    }
+  }
+
+  return []; // Não encontrado
+}
+
+
+// Exibir os nós descendentes de um determinado elemento
+  descendants(value: T): T[] {
+  const targetNode = this.findNode(this.root, value);
+  const result: T[] = [];
+
+  if (targetNode) {
+    this.collectDescendants(targetNode, result);
+  }
+
+  return result;
+}
+
+private findNode(node: TreeNode<T> | null, value: T): TreeNode<T> | null {
+  if (node === null) return null;
+  if (value === node.value) return node;
+  if (value < node.value) return this.findNode(node.left, value);
+  return this.findNode(node.right, value);
+}
+
+private collectDescendants(node: TreeNode<T>, result: T[]): void {
+  if (node.left) {
+    result.push(node.left.value);
+    this.collectDescendants(node.left, result);
+  }
+  if (node.right) {
+    result.push(node.right.value);
+    this.collectDescendants(node.right, result);
+  }
+}
+
+// Exibir o nível de um elemento/nó
+  level(value: T): number {
+    return this.findLevel(this.root, value, 0);
+  }
+
+  private findLevel(node: TreeNode<T> | null, value: T, currentLevel: number): number {
+    if (node === null) return -1; // Elemento não encontrado
+    if (value === node.value) return currentLevel;
+
+    const leftLevel = this.findLevel(node.left, value, currentLevel + 1);
+    if (leftLevel !== -1) return leftLevel;
+
+    return this.findLevel(node.right, value, currentLevel + 1);
+  }
+  // Verificar se a árvore é estritamente binária
+  isStrictlyBinary(): boolean {
+  return this.checkStrictlyBinary(this.root);
+}
+
+private checkStrictlyBinary(node: TreeNode<T> | null): boolean {
+  if (node === null) return true;
+
+  if ((node.left === null && node.right !== null) ||
+      (node.left !== null && node.right === null)) {
+    return false;
+  }
+
+  return this.checkStrictlyBinary(node.left) && this.checkStrictlyBinary(node.right);
+}
+
+// Verificar se a árvore é cheia
+isFull(): boolean {
+  const totalNodes = this.count;
+  const height = this.height();
+
+  // Fórmula para uma árvore cheia: total = 2^(h+1) - 1
+  return totalNodes === Math.pow(2, height + 1) - 1;
+}
+
+
+
+  
 }
 
 // Testando a Árvore
@@ -153,3 +247,8 @@ bst.postOrderTraversal();    // Pós-Ordem
 
 console.log("Altura da árvore:", bst.height());  // Deve exibir 2
 console.log("Quantidade de elementos:", bst.size()); // Deve exibir 7
+console.log("Ancestrais do elemento 40:", bst.ancestors(40)); // Deve exibir [50, 30]
+console.log("Descendentes do elemento 30:", bst.descendants(30)); // Deve exibir [20, 40]
+console.log("Nível do elemento 60:", bst.level(60)); // Deve exibir 2
+console.log("A árvore é estritamente binária?", bst.isStrictlyBinary()); // Deve exibir true
+console.log("A árvore é cheia?", bst.isFull()); // Deve exibir false
